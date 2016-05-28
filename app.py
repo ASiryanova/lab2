@@ -10,7 +10,7 @@ if __name__ == '__main__':
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument('symbol', help='Символ финансового инструмента')
-    parser.add_argument('-y', '--year', help='Год для анализа')
+    parser.add_argument('-y', '--year', help='Год для анализа', default=2016)
     parser.add_argument('-p', '--print', help='Вывести все данные', action='store_true')
     args = parser.parse_args()
 
@@ -21,8 +21,8 @@ if __name__ == '__main__':
     else:
         year = datetime.datetime.now().year
     logging.debug('Год {:d}'.format(year))
-    start_date = datetime.date(year, 1, 1)
-    end_date = datetime.date(year, 12, 31)
+    start_date = datetime.date(args.year, 1, 1)
+    end_date = datetime.date(args.year, 12, 31)
 
     logging.debug('Загрузка данных для ' + args.symbol)
     data = dp.google(args.symbol, start_date, end_date)
