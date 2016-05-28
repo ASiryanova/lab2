@@ -1,42 +1,31 @@
-import sys
-import csv
+import argparse
+import datetime
+import logging
 
-def day_up_value(close_prices, max_value):
-    day = 0
-    for close_price in close_prices:
-        if close_price <= max_value: 
-            day = day + 1
-    return day
-    
-
-def main(file_name, max_value, file_name_print=None):
-    with open(file_name) as f:
-        csv_file = csv.reader(f, delimiter=',')
-        close_prices = []
-        for row in csv_file:
-            x=float((row[4]))
-            close_prices.append(x)
-    day = day_up_value(close_prices, max_value)        
-    if file_name_print:
-        with open(file_name_print, 'w') as f_out:
-            f_out.write(str(day))
-
-        #f_out = open(file_name_print, 'w')
-        #f_out.write(str(day))
-    print(day)
-
+import data_processing as dp
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        file_name = sys.argv[1]
-        if len(sys.argv) > 2:
-            max_value = sys.argv[2]
-            file_name_print = sys.argv[3] if len(sys.argv) > 3 else None
-            main(file_name, float(max_value), file_name_print)
-        else:
-            print("Укажите уровень закрытия цены")
-    else:    
-        print("Укажите имя файла")
+    logging.basicConfig(filename='app.log', level=logging.INFO, filemode='w')
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument('symbol', help='Символ финансового инструмента')
+    parser.add_argument('-y', '--year', help='Год для анализа')
+    parser.add_argument('-p', '--print', help='Вывести все данные', action='store_true')
+    args = parser.parse_args()
 
+    # Определяем год для чтения данных
+    # Если год не указан берем текущий год
+    if args.year:
+        year = int(args.year)
+    else:
+        year = datetime.datetime.now().year
+    logging.debug('Год {:d}'.format(year))
+    start_date = datetime.date(year, 1, 1)
+    end_date = datetime.date(year, 12, 31)
 
+    logging.debug('Загрузка данных для ' + args.symbol)
+    data = dp.google(args.symbol, start_date, end_date)
 
+    if args.print:
+        dp.print_data(data, title='Исходные данные')
